@@ -29,7 +29,7 @@ pub struct Fund {
     #[serde(default)]
     pub registration_snapshot_time: i64,
     #[serde(default)]
-    pub next_registration_snapshot_time: Option<i64>,
+    pub next_registration_snapshot_time: i64,
     #[serde(alias = "chainVotePlans", default = "Vec::new")]
     pub chain_vote_plans: Vec<Voteplan>,
     #[serde(default = "Vec::new")]
@@ -78,7 +78,7 @@ struct FundWithLegacyFields {
     fund_end_time: i64,
     next_fund_start_time: i64,
     registration_snapshot_time: i64,
-    next_registration_snapshot_time: Option<i64>,
+    next_registration_snapshot_time: i64,
     chain_vote_plans: Vec<Voteplan>,
     challenges: Vec<Challenge>,
 }
@@ -153,7 +153,7 @@ impl Queryable<funds::SqlType, Db> for Fund {
             fund_name: row.1,
             fund_goal: row.2,
             registration_snapshot_time: row.3,
-            next_registration_snapshot_time: Some(row.4),
+            next_registration_snapshot_time: row.4,
             voting_power_threshold: row.5,
             fund_start_time: row.6,
             fund_end_time: row.7,
@@ -218,7 +218,7 @@ impl Insertable<funds::table> for Fund {
             funds::fund_name.eq(self.fund_name),
             funds::fund_goal.eq(self.fund_goal),
             funds::registration_snapshot_time.eq(self.registration_snapshot_time),
-            funds::next_registration_snapshot_time.eq(self.next_registration_snapshot_time.unwrap_or(0)),
+            funds::next_registration_snapshot_time.eq(self.next_registration_snapshot_time),
             funds::voting_power_threshold.eq(self.voting_power_threshold),
             funds::fund_start_time.eq(self.fund_start_time),
             funds::fund_end_time.eq(self.fund_end_time),

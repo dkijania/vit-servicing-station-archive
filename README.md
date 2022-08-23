@@ -200,7 +200,7 @@ In this project in folder /resources/migrations there are all db update scrips.
 Also, the same scripts can be downloaded from ipfs:
 
 ```
-https://ipfs.io/ipfs/QmP9xp7KTSAuKt2wK5gNopVn16KrohK9AUrCuwbkY39cXb
+https://ipfs.io/ipfs/QmameCc64jZKrc9fyiiBApZrPbhf12PxJiBEPCNJSK3LUh
 ```
 
 Using [diesel cli](https://diesel.rs/guides/getting-started) we can setup database with static data first:
@@ -235,7 +235,7 @@ Now we should run diesel cli and create database
 [root@..:~]# diesel database setup --database-url archive.db --migration-dir resources\migrations
 Creating database: archive.db
 Running migration 2020-05-22_setup_db
-Running migration 2020-05-23_fund6
+Running migration 2020-05-23-0100_fund6
 Running migration 2020-05-24-1100_fund7
 Running migration 2020-05-24-1200_fund7_fix
 Running migration 2020-05-25_fund8

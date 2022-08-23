@@ -261,7 +261,7 @@ fn convert_fund(fund: &Fund) -> Vec<String> {
         fund_end_time.to_string(),
         next_fund_start_time.to_string(),
         registration_snapshot_time.to_string(),
-        next_registration_snapshot_time.unwrap_or(0).to_string(),
+        next_registration_snapshot_time.to_string(),
         stage_dates.insight_sharing_start.to_string(),
         stage_dates.proposal_submission_start.to_string(),
         stage_dates.refine_proposals_start.to_string(),
