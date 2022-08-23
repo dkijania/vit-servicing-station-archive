@@ -1,0 +1,98 @@
+use std::io;
+use std::path::{Path, PathBuf};
+use std::str::FromStr;
+use crate::db;
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
+pub type SharedContext = Arc<RwLock<Context>>;
+
+#[derive(Clone)]
+pub struct GenesisBlock {
+    pub block0_path: String,
+    pub block0: Vec<u8>,
+}
+
+impl GenesisBlock {
+    pub(crate) fn is_fund_id(&self, fund_id: i32) -> bool {
+        Path::new(&self.block0_path).file_stem().unwrap().to_str().unwrap() == format!("fund{}",fund_id)
+    }
+}
+
+impl FromStr for GenesisBlock {
+    type Err = io::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self {
+            block0: std::fs::read(s).unwrap_or_default(),
+            block0_path: s.to_string()
+        })
+    }
+}
+
+#[derive(Clone)]
+pub struct Context {
+    pub db_connection_pool: db::DbConnectionPool,
+    pub versioning: String,
+    pub block0: Vec<GenesisBlock>
+}
+
+impl Context {
+    pub fn new(
+        db_connection_pool: db::DbConnectionPool,
+        block0: Vec<GenesisBlock>,
+        versioning: String,
+    ) -> Self {
+        Self {
+            db_connection_pool,
+            block0,
+            versioning,
+        }
+    }
+}
+
+pub fn new_shared_context(
+    db_connection_pool: db::DbConnectionPool,
+    block0_path: Vec<PathBuf>,
+    versioning: &str,
+) -> SharedContext {
+
+    let context = Context::new(
+        db_connection_pool,
+        block0_path.iter().map(|x| GenesisBlock::from_str(x.to_str().unwrap()).unwrap()).collect(),
+        versioning.to_string(),
+    );
+    Arc::new(RwLock::new(context))
+}
+
+#[cfg(test)]
+pub mod test {
+    use rand::{distributions::Alphanumeric, thread_rng, Rng};
+
+    use super::*;
+    use crate::db;
+
+    pub fn new_in_memmory_db_test_shared_context() -> SharedContext {
+        let name: String = thread_rng()
+            .sample_iter(Alphanumeric)
+            .take(5)
+            .map(char::from)
+            .collect();
+        let db_url = format!("file:{}?mode=memory&cache=shared", name);
+        let pool = db::load_db_connection_pool(&db_url).unwrap();
+        let block0: Vec<u8> = vec![1, 2, 3, 4, 5];
+        Arc::new(RwLock::new(Context::new(
+            pool,
+            vec![GenesisBlock{
+                block0_path: "".to_string(),
+                block0
+            }],
+            "2.0".to_string()
+        )))
+    }
+
+    pub fn new_test_shared_context(db_url: &str, block0_path: Vec<&str>) -> SharedContext {
+        let pool = db::load_db_connection_pool(db_url).unwrap();
+        new_shared_context(pool, block0_path, "2.0")
+    }
+}
